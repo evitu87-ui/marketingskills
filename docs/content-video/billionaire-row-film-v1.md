@@ -162,3 +162,18 @@ _03.10.2026. Исходники: 3 ролика Босса с его озвуч�
 - **Сценарий v4 с таймкодами:** `billionaire-row-film-v4-script.md`. **Посты для канала (А — кейс, Б — от первого лица):** `channel-post-drafts.md`.
 - **n8n подключён в claude.ai Connectors (04.10)**, но в текущей сессии не виден — коннекторы читаются при старте. **Следующая сессия:** собрать по Build Kit v1 Ноды 4–7 (Veo 3.1 через Gemini API: запуск `predictLongRunning` → Wait → poll → IF) и Ноду 8 (S3 Timeweb), затем 8.1–8.3. Ключ Gemini и доступы S3 Босс кладёт в credentials n8n сам.
 - **Ждём от Босса для v4:** фото квартиры (оригиналы, 6–10 ракурсов) в Google Drive/чат; Earth Studio ×2 (.mov в проект Descript 54bfc98d…); решение по обложке канала (+ фото анфас).
+
+---
+
+## 04.10 — КОНВЕЙЕР СОБРАН И ПРОШЁЛ ПЕРВЫЙ ПРОГОН
+
+**n8n workflow `K4lt9OIDHNGBqRmU` «VIDEO-PROD — фото → пролёт (Veo 3.1)»** (https://service.aida-oceana.com/workflow/K4lt9OIDHNGBqRmU), код: `docs/content-video/n8n/video-prod-stage1.workflow.js`.
+
+Вход: `POST /webhook/video-prod` `{ project, image_url, brief, prompt?, orientation (9:16|16:9), model?, duration (4|6|8), chat_id? }`.
+Цепочка: Нормализовать бриф → Скачать фото → base64 → Claude (claude-sonnet-5, credential «Anthropic account 2» — «Anthropic account» протух) пишет veo_prompt/negative_prompt (мягкая камера, объект не меняем) → Veo 3.1 `predictLongRunning` с image (Header Auth «Gemini API») → Wait 15 с → статус → IF done (цикл) → извлечь URI → Скачать MP4 → S3 `menaoffplan-media/video-prod/{project}/{ts}.mp4` (publicRead) + Telegram sendVideo (Monitor bot, группа -1004402230561) с подписью. Отказ RAI → sendMessage.
+
+**Грабли, которые уже пройдены:** (1) `temperature` deprecated для claude-sonnet-5 — убран; (2) raw.githubusercontent.com не доступен с сервера n8n (Timeweb) — фото надо хостить на своём домене/S3/Telegram; (3) Veo image-to-video требует `personGeneration: allow_adult`, `dont_allow` отвергается.
+
+**Первый успешный прогон:** execution 15033, 04.10 18:16 UTC, фото 10_skyline_yacht (башни + яхта), Fast, 9:16, 8 с — операция 57km901v19wt, 3 опроса (45 с), MP4 10,6 МБ → S3 `video-prod/canal-front-test/20261004-221633.mp4` → Telegram message_id 237. Стоимость ≈ $1.
+
+**Дальше (Этап 1 по спецификации):** Нода 1 — приём фото из Telegram (замена webhook), пакет из N фото → N клипов, Нода 3.5 enhance, 8.1–8.3 пост-стадия, Approve/Reject кнопки.
