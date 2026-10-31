@@ -8,20 +8,26 @@ import json, re, subprocess, sys
 take, outdir = sys.argv[1], sys.argv[2]
 TARGET = float(sys.argv[3]) if len(sys.argv) > 3 else -18.0
 S = json.load(open('ps_script.json'))
+if len(sys.argv) > 4:
+    keep = sys.argv[4].split(',')
+    S = [l for l in S if l['id'] in keep]
 n = len(S)
 
 
 def ff(args):
-    return subprocess.run(['ffmpeg', '-hide_banner', *args], capture_output=True, text=True).stderr
+    return subprocess.run(['ffmpeg', '-nostdin', '-hide_banner', *args], capture_output=True, text=True).stderr
 
 
 log = ff(['-i', take, '-af', 'silencedetect=noise=-38dB:d=0.28', '-f', 'null', '-'])
 starts = [float(x) for x in re.findall(r'silence_start: ([\d.]+)', log)]
 ends = [float(x) for x in re.findall(r'silence_end: ([\d.]+)', log)]
-total = float(re.findall(r'time=(\d+):(\d+):([\d.]+)', log)[-1][2]) + 60 * int(re.findall(r'time=(\d+):(\d+):([\d.]+)', log)[-1][1])
+_t = re.findall(r'time=(\d+):(\d+):([\d.]+)', log)[-1]
+total = int(_t[0]) * 3600 + int(_t[1]) * 60 + float(_t[2])
 sil = [(s, e) for s, e in zip(starts, ends)]
 lead = sil[0][1] if sil and sil[0][0] < 0.05 else 0.0
 tail = sil[-1][0] if sil and sil[-1][1] > total - 0.05 else total
+if len(starts) > len(ends):  # trailing silence runs to EOF
+    tail = starts[-1]
 inner = [(s, e) for s, e in sil if s > lead + 0.1 and e < tail - 0.1]
 print(f'take {total:.2f}s, speech {lead:.2f}-{tail:.2f}, pauses {len(inner)}')
 

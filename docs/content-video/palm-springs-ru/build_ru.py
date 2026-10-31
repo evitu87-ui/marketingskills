@@ -7,7 +7,9 @@ DUR = 114.546
 CUT = 107.5   # author's DM mock-up + Phoenix logo start right after this
 FINAL = 111.0
 GAP = 0.10
-MAX_TEMPO = 1.15
+import os
+BASE_TEMPO = float(os.environ.get('BASE_TEMPO', '1.0'))
+MAX_TEMPO = BASE_TEMPO * 1.04
 OUT = sys.argv[1] if len(sys.argv) > 1 else 'out/palm_springs_ru.mp4'
 
 
@@ -32,13 +34,13 @@ prev_end = 0.0
 for i, l in enumerate(S):
     src = f"tts/{l['id']}.wav"
     tr = f"tts/{l['id']}_trim.wav"
-    run(['ffmpeg', '-loglevel', 'error', '-y', '-i', src, '-af', trim, tr])
+    run(['ffmpeg', '-loglevel', 'error', '-y', '-nostdin', '-i', src, '-af', trim, tr])
     d = dur(tr)
     start = max(l['start'], prev_end + GAP)
     nxt = S[i + 1]['start'] if i + 1 < len(S) else FINAL - 0.6
     room = nxt - GAP - start
-    tempo = 1.0
-    if d > room:
+    tempo = BASE_TEMPO
+    if d / tempo > room:
         tempo = min(d / room, MAX_TEMPO)
     d2 = d / tempo
     end = start + d2
@@ -49,13 +51,16 @@ for i, l in enumerate(S):
 for p in plan:
     print(f"{p['id']} {p['start']:7.2f}-{p['end']:7.2f} tempo {p['tempo']:.3f} drift {p['drift']:+.2f}")
 json.dump(plan, open('ru_plan.json', 'w'), indent=1)
+import os
+if os.environ.get('PLAN_ONLY'):
+    raise SystemExit(0)
 
 # --- audio: delay each line, mix, loudness-normalise
 inputs, fl = [], []
 for k, p in enumerate(plan):
     inputs += ['-i', p['src']]
     chain = f"[{k}:a]aresample=48000"
-    if p['tempo'] > 1.0:
+    if abs(p['tempo'] - 1.0) > 1e-3:
         chain += f",atempo={p['tempo']}"
     ms = int(p['start'] * 1000)
     chain += f",adelay={ms}|{ms}[a{k}]"
