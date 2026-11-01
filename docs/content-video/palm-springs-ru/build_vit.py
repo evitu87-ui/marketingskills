@@ -60,23 +60,33 @@ af.append(f"{mix}amix=inputs={len(plan)}:normalize=0,apad,atrim=0:{TOTAL:.3f},"
 run(['ffmpeg', '-nostdin', '-loglevel', 'error', '-y', *ain, '-filter_complex', ';'.join(af), '-map', '[aout]',
      '-ar', '48000', 'out/vit_voice.wav'])
 
-# --- video: per-group slice -> slow -> hold, concat, then panel + captions by output time
-vf = []
+# --- video pass 1: each group rendered on its own (avoids buffering the whole source in RAM)
+os.makedirs('vseg', exist_ok=True)
+lst = []
 for k, p in enumerate(plan):
     va, vb = p['video']
-    if vb - va < 0.02:  # pure freeze of the frame at va
-        vf.append(f"[0:v]trim=start={va - 0.02:.3f}:end={va:.3f},setpts=PTS-STARTPTS,fps=60,"
-                  f"tpad=stop_mode=clone:stop_duration={p['out'][1] - p['out'][0]:.3f},"
-                  f"trim=duration={p['out'][1] - p['out'][0]:.3f}[g{k}]")
-        continue
-    chain = f"[0:v]trim=start={va:.3f}:end={vb:.3f},setpts=(PTS-STARTPTS)*{p['slow']},fps=60"
-    if p['hold'] > 0.01:
-        chain += f",tpad=stop_mode=clone:stop_duration={p['hold']:.3f}"
-    chain += f",trim=duration={p['out'][1] - p['out'][0]:.3f}[g{k}]"
-    vf.append(chain)
-vf.append(''.join(f'[g{k}]' for k in range(len(plan))) + f"concat=n={len(plan)}:v=1:a=0,setpts=PTS-STARTPTS[base]")
-vin = ['-i', VID, '-loop', '1', '-i', 'caps_vit/panel.png']
-vf.append('[base][1:v]overlay=0:0:shortest=1[c0]')
+    T = p['out'][1] - p['out'][0]
+    seg = f'vseg/g{k:02d}.mp4'
+    if vb - va < 0.02:
+        run(['ffmpeg', '-nostdin', '-loglevel', 'error', '-y', '-ss', f'{va - 0.05:.3f}', '-i', VID, '-frames:v', '1',
+             'vseg/freeze.png'])
+        run(['ffmpeg', '-nostdin', '-loglevel', 'error', '-y', '-loop', '1', '-framerate', '60', '-i', 'vseg/freeze.png',
+             '-t', f'{T:.3f}', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '14', '-pix_fmt', 'yuv420p', seg])
+    else:
+        vfx = f"setpts=(PTS-STARTPTS)*{p['slow']},fps=60"
+        if p['hold'] > 0.01:
+            vfx += f",tpad=stop_mode=clone:stop_duration={p['hold']:.3f}"
+        vfx += f",trim=duration={T:.3f}"
+        run(['ffmpeg', '-nostdin', '-loglevel', 'error', '-y', '-ss', f'{va:.3f}', '-to', f'{vb:.3f}', '-i', VID,
+             '-an', '-vf', vfx, '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '14', '-pix_fmt', 'yuv420p', seg])
+    lst.append(f"file '{os.path.basename(seg)}'")
+open('vseg/list.txt', 'w').write('\n'.join(lst) + '\n')
+run(['ffmpeg', '-nostdin', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', 'vseg/list.txt', '-c', 'copy',
+     'vseg/base.mp4'])
+print('base ready')
+vf = []
+vin = ['-i', 'vseg/base.mp4', '-loop', '1', '-i', 'caps_vit/panel.png']
+vf.append('[0:v][1:v]overlay=0:0:shortest=1[c0]')
 caps = [c for p in plan for c in p['caps']]
 for k, (lid, a, b) in enumerate(caps):
     vin += ['-loop', '1', '-i', f'caps_vit/{lid}.png']
