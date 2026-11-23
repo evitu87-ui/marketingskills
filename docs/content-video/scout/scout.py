@@ -19,6 +19,8 @@ RAW, DATA = os.path.join(WORK, 'raw'), os.path.join(WORK, 'data')
 os.makedirs(RAW, exist_ok=True)
 os.makedirs(DATA, exist_ok=True)
 HOOK_SEC, PAUSE = 3.5, 20          # hook window; pause between Instagram requests
+_rj = os.path.join(WORK, 'reels.json')        # written by scout_apify.py: plays + direct video links
+REELS = {r['code']: r for r in json.load(open(_rj, encoding='utf-8'))} if os.path.exists(_rj) else {}
 
 
 def sh(cmd, timeout=600):
@@ -39,6 +41,14 @@ def fetch(code):
     mp4, info = os.path.join(RAW, code + '.mp4'), os.path.join(RAW, code + '.info.json')
     if os.path.exists(mp4) and os.path.exists(info):
         return True
+    r = REELS.get(code)
+    if r and r.get('video_url'):
+        sh(['curl', '-s', '-L', '-m', '180', '-o', mp4, r['video_url']])
+        if os.path.exists(mp4) and os.path.getsize(mp4) > 100000:
+            json.dump(dict(channel=r['account'], uploader=r.get('author'), upload_date=r['date'].replace('-', ''),
+                           like_count=r['likes'], comment_count=r['comments'], view_count=r['plays'],
+                           description=r['caption']), open(info, 'w', encoding='utf-8'), ensure_ascii=False)
+            return True
     for attempt in range(4):
         r = sh(['yt-dlp', '-q', '--no-progress', '--write-info-json', '-f', 'mp4/best', '--merge-output-format', 'mp4',
                 '-o', os.path.join(RAW, '%(id)s.%(ext)s'), f'https://www.instagram.com/reel/{code}/'])
@@ -128,14 +138,21 @@ def report(rows):
     def n(v):
         return '—' if v is None else str(v)
 
-    rows = sorted(rows, key=lambda d: -((d.get('comments') or 0) * 5 + (d.get('likes') or 0)))
-    L = ['# Разведка: таблица рилсов', '',
-         f'Роликов: {len(rows)}. Сортировка: лайки + 5 × комментарии (комментарий весит больше, это кодовое слово и заявки).', '',
-         '| Аккаунт | Дата | Лайки | Комм. | Длина, с | Склеек/мин | Слов/с | Язык | Хук (первые 3,5 с) | Концовка |',
-         '|---|---|---|---|---|---|---|---|---|---|']
+    for d in rows:                      # fresh numbers from the scraper, when we have them
+        r = REELS.get(d['code']) or {}
+        d['views'], d['x_median'] = r.get('plays', d.get('views')), r.get('x_median')
+    if any(d['x_median'] for d in rows):
+        rows = sorted(rows, key=lambda d: -(d['x_median'] or 0))
+        order = 'просмотры ролика к медиане своего аккаунта'
+    else:
+        rows = sorted(rows, key=lambda d: -((d.get('comments') or 0) * 5 + (d.get('likes') or 0)))
+        order = 'лайки + 5 × комментарии'
+    L = ['# Разведка: таблица рилсов', '', f'Роликов: {len(rows)}. Сортировка: {order}.', '',
+         '| Аккаунт | Дата | × медианы | Просмотры | Лайки | Комм. | Длина, с | Склеек/мин | Слов/с | Язык | Хук (первые 3,5 с) | Концовка |',
+         '|---|---|---|---|---|---|---|---|---|---|---|---|']
     for d in rows:
         date = d['date'] and f"{d['date'][6:8]}.{d['date'][4:6]}.{d['date'][:4]}"
-        L.append(f"| [{d['account']}]({d['url']}) | {date} | {n(d['likes'])} | {n(d['comments'])} | {n(d['duration'])} | "
+        L.append(f"| [{d['account']}]({d['url']}) | {date} | {n(d['x_median'])} | {n(d['views'])} | {n(d['likes'])} | {n(d['comments'])} | {n(d['duration'])} | "
                  f"{n(d['cuts_per_min'])} | {n(d['words_per_sec'])} | {d['language']} | {d['hook'].replace('|', '/')} | "
                  f"{d['cta'].replace('|', '/')} |")
     open(os.path.join(WORK, 'report.md'), 'w', encoding='utf-8').write('\n'.join(L) + '\n')
