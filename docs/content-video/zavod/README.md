@@ -33,7 +33,7 @@ _Старт 23.11.2026. Свой завод вместо покупки у Па�
 - **ZAVOD-0 Пульт бота** (`y2wLi87RSRUGM9LM`, опубликован): бот `Zavod bot` отвечает на сообщение номером чата. Сюда же пойдут команды и кнопки согласования.
 - Таблица `zavod_accounts` (`JsxVD1yU1bsz4N5g`): 35 аккаунтов, активны 20 (10 RU и 10 EN), остальные в резерве с `active = false`. Новый аккаунт = новая строка с `active = true`.
 - Таблица `zavod_reels` (`ogak2ektwK6k9M1J`): рилсы с просмотрами, «× медианы», хуком, призывом и полным разбором в `analysis` (JSON).
-- Таблица `zavod_settings` (`VSq3VR5HB1HOPfBH`): `chat_id` — куда слать сводки.
+- Таблица `zavod_settings` (`VSq3VR5HB1HOPfBH`): `chat_id` — куда слать сводки. С 24.11.2026 это группа InstaRazvedka; пробная сводка доставлена.
 - Ключи: `Apify API`, `Gemini API`, `Zavod bot`, Anthropic, Supabase.
 - Воркфлоу `049Tla1FKmHGFrmC` AVATAR-TEST (кадры и видео аватара), снят с публикации.
 
