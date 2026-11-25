@@ -48,7 +48,7 @@ for i, (s, e, lines, (vt, kind, vat), bend) in enumerate(beats):
 ev.append(dict(start=tb(29.12), end=tb(31.0), y=505, tilt=0.12, roll=-4.0, lines=[dict(t='такого никто не знает', w='light', size=74, at=tb(29.12))]))
 vd[-1]['y'] = 250
 ev.append(dict(start=tc(0.0), end=tc(3.95), y=190, tilt=0.05, roll=1.0, lines=[
-    dict(t='Напишите', w='light', at=tc(0.0)), dict(t='ESCROW', w='heavy', size=200, at=tc(0.58)),
+    dict(t='Напишите', w='light', at=tc(0.0)), dict(t='ЭСКРОУ', w='heavy', size=200, at=tc(0.58)),
     dict(t='пришлём чек-лист проверки', w='light', size=80, at=tc(1.6))]))
 ev.append(dict(start=tc(4.1), end=tc(CTA) + 0.2, y=230, tilt=-0.04, roll=-1.0, lines=[
     dict(t='Подробности', w='heavy', size=150, at=tc(4.1)), dict(t='у нас', w='light', at=tc(4.45))]))
