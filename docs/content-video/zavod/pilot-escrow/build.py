@@ -10,11 +10,11 @@ BODY = cuts[-1] / K
 VF = 'scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,fps=30,setsar=1'
 SHIFT = ',split[m][t];[t]crop=1080:24:0:0,scale=1080:170[tt];[m]crop=1080:1750:0:0[mm];[tt][mm]vstack'   # push the close shot down
 parts = []
-run(['ffmpeg','-nostdin','-loglevel','error','-y','-i','lip_hook.mp4','-t',str(HOOK),'-an','-vf',VF,'-c:v','libx264','-crf','16','-pix_fmt','yuv420p','p0.mp4']); parts.append('p0.mp4')
+run(['ffmpeg','-nostdin','-loglevel','error','-y','-i','lip_hook.mp4','-t',str(HOOK),'-an','-vf',VF + ',tpad=stop_mode=clone:stop_duration=0.3','-c:v','libx264','-crf','16','-pix_fmt','yuv420p','p0.mp4']); parts.append('p0.mp4')
 for i, (a, b) in enumerate(body):
     d = b - a
     run(['ffmpeg','-nostdin','-loglevel','error','-y','-ss','0.35','-i',f'b{i+2}.mp4','-t',f'{d:.3f}','-an','-vf',VF + ',unsharp=5:5:0.6' + (SHIFT if i == 6 else ''),'-c:v','libx264','-crf','16','-pix_fmt','yuv420p',f'p{i+1}.mp4']); parts.append(f'p{i+1}.mp4')
-run(['ffmpeg','-nostdin','-loglevel','error','-y','-i','lip_cta.mp4','-t',str(CTA),'-an','-vf',VF,'-c:v','libx264','-crf','16','-pix_fmt','yuv420p','p8.mp4']); parts.append('p8.mp4')
+run(['ffmpeg','-nostdin','-loglevel','error','-y','-i','lip_cta.mp4','-t',str(CTA),'-an','-vf',VF + ',tpad=stop_mode=clone:stop_duration=0.3','-c:v','libx264','-crf','16','-pix_fmt','yuv420p','p8.mp4']); parts.append('p8.mp4')
 open('list.txt','w').write(''.join(f"file '{p}'\n" for p in parts))
 run(['ffmpeg','-nostdin','-loglevel','error','-y','-f','concat','-safe','0','-i','list.txt','-c','copy','video.mp4'])
 # voice: hook + sped-up body + cta, padded to the exact slot lengths, then loudness
