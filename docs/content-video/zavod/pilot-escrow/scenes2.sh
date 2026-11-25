@@ -1,0 +1,14 @@
+g(){ /usr/bin/python3 gen_still.py "$1" "$2"; }
+g b1 "Scene: early morning at a Dubai high-rise construction site, tower cranes and a concrete building frame softly blurred in the lower background, the upper part of the frame is clear pale dawn sky. Three-quarter-length shot from mid-thigh up: she stands facing the camera, looking straight into the lens, lips slightly parted as if about to speak, confident calm expression." &
+g b2 "Scene: a bright modern private bank hall in daytime with a marble counter and glass partitions, high plain ceiling above. Full-body shot head to toe: she walks toward the camera holding a slim folder of documents, looking into the lens." &
+g b3 "Scene: a stylish cafe terrace in a business district in daytime, glass towers behind, open sky above. Full-body shot: she stands beside a small table and pushes a blank sheet of paper away across the table with one hand, sceptical expression, looking into the lens." &
+wait
+g b4 "Scene: a tall glass-walled meeting room in daytime with a city skyline behind, plain high ceiling and upper glass above her. Full-body shot head to toe: she walks toward the camera holding a tablet in one hand at waist height, looking into the lens with a slight smile." &
+g b5 "Scene: a completed premium residential quarter at blue hour, finished lit towers at the sides, deep blue evening sky filling the upper part of the frame. Full-body shot head to toe: she walks toward the camera along a paved promenade, looking into the lens." &
+g b6 "Scene: an empty sandy construction plot at noon behind a low hoarding fence, a billboard with an architectural rendering of a tower (no text) stands low to one side behind her, wide clear blue sky fills the upper part of the frame. Full-body shot: she gestures with one hand back toward the billboard, raised eyebrow, looking into the lens." &
+wait
+g b7 "Scene: a viewing terrace above a large construction site in the morning, cranes and half-built towers low in the background, pale morning sky fills the upper part of the frame. Full-body shot head to toe: she walks toward the camera holding a tablet at waist height, looking into the lens." &
+g b8 "Scene: an elegant developer showroom in the evening, an illuminated architectural scale model of a tower low to one side behind her, a dark plain wall and ceiling above. Full-body shot head to toe: she walks toward the camera away from the model with a slight sceptical head tilt, looking into the lens." &
+g b9 "Scene: an evening lounge, she sits behind a dark marble reception desk facing the camera, hands resting on the desk, heavy dark curtains and a dim wall fill the upper part of the frame behind her. Medium shot: her head is at about half of the frame height, she looks straight into the lens, lips slightly parted as if about to speak, warm friendly expression." &
+wait
+ls -la b?.png | awk '{print $5,$9}'
