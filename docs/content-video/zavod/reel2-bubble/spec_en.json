@@ -1,0 +1,293 @@
+{
+ "fps": 30,
+ "shade": 0.55,
+ "events": [
+  {
+   "start": 0.02,
+   "end": 3.82,
+   "y": 200,
+   "tilt": 0.05,
+   "roll": 1.2,
+   "lines": [
+    {
+     "t": "Bubble",
+     "w": "heavy",
+     "at": 0.02,
+     "size": 190
+    },
+    {
+     "t": "or a maturing market?",
+     "w": "light",
+     "at": 0.32,
+     "size": 84
+    },
+    {
+     "t": "let's check the numbers",
+     "w": "light",
+     "at": 2.54,
+     "size": 76
+    }
+   ]
+  },
+  {
+   "start": 3.92,
+   "end": 7.83,
+   "y": 190,
+   "tilt": -0.05,
+   "roll": -1.0,
+   "lines": [
+    {
+     "t": "Sales, year on year",
+     "w": "light",
+     "at": 3.92
+    },
+    {
+     "t": "−21%",
+     "w": "heavy",
+     "at": 4.87,
+     "size": 220
+    },
+    {
+     "t": "still more than all of 2023",
+     "w": "light",
+     "at": 6.2,
+     "size": 76
+    }
+   ]
+  },
+  {
+   "start": 8.28,
+   "end": 12.16,
+   "y": 190,
+   "tilt": 0.05,
+   "roll": 1.2,
+   "lines": [
+    {
+     "t": "Not a crash.",
+     "w": "light",
+     "at": 9.04
+    },
+    {
+     "t": "A market cooling",
+     "w": "heavy",
+     "at": 10.17,
+     "size": 124
+    },
+    {
+     "t": "after record years",
+     "w": "light",
+     "at": 10.98
+    }
+   ]
+  },
+  {
+   "start": 12.5,
+   "end": 14.7,
+   "y": 190,
+   "tilt": -0.05,
+   "roll": -1.0,
+   "lines": [
+    {
+     "t": "Only about",
+     "w": "light",
+     "at": 12.5
+    },
+    {
+     "t": "one deal in ten",
+     "w": "heavy",
+     "at": 12.87,
+     "size": 124
+    },
+    {
+     "t": "uses a mortgage",
+     "w": "light",
+     "at": 13.75
+    }
+   ]
+  },
+  {
+   "start": 15.08,
+   "end": 18.61,
+   "y": 190,
+   "tilt": 0.05,
+   "roll": 1.2,
+   "lines": [
+    {
+     "t": "Since 2020, Dubai added",
+     "w": "light",
+     "at": 15.08,
+     "size": 80
+    },
+    {
+     "t": "+1.4M",
+     "w": "heavy",
+     "at": 16.76,
+     "size": 200
+    },
+    {
+     "t": "residents",
+     "w": "light",
+     "at": 18.0
+    }
+   ]
+  },
+  {
+   "start": 18.98,
+   "end": 24.86,
+   "y": 190,
+   "tilt": -0.05,
+   "roll": -1.0,
+   "lines": [
+    {
+     "t": "Median price per sq ft",
+     "w": "light",
+     "at": 18.98,
+     "size": 84
+    },
+    {
+     "t": "AED 1,730",
+     "w": "heavy",
+     "at": 19.86,
+     "size": 170
+    },
+    {
+     "t": "this autumn: −1–2% a month",
+     "w": "light",
+     "at": 22.8,
+     "size": 72
+    }
+   ]
+  },
+  {
+   "start": 24.95,
+   "end": 29.39,
+   "y": 190,
+   "tilt": 0.05,
+   "roll": 1.2,
+   "lines": [
+    {
+     "t": "Scheduled for handover in 2027",
+     "w": "light",
+     "at": 24.95,
+     "size": 72
+    },
+    {
+     "t": "122,000",
+     "w": "heavy",
+     "at": 25.51,
+     "size": 200
+    },
+    {
+     "t": "units",
+     "w": "light",
+     "at": 26.98
+    }
+   ]
+  },
+  {
+   "start": 29.72,
+   "end": 32.9,
+   "y": 190,
+   "tilt": -0.05,
+   "roll": -1.0,
+   "lines": [
+    {
+     "t": "Most of it lands in",
+     "w": "light",
+     "at": 29.72,
+     "size": 80
+    },
+    {
+     "t": "Dubai South",
+     "w": "heavy",
+     "at": 30.54,
+     "size": 100
+    },
+    {
+     "t": "Wadi Al Safa",
+     "w": "heavy",
+     "at": 31.4,
+     "size": 100
+    },
+    {
+     "t": "JVC",
+     "w": "heavy",
+     "at": 32.2,
+     "size": 100
+    }
+   ]
+  },
+  {
+   "start": 33.03,
+   "end": 34.74,
+   "y": 190,
+   "tilt": 0.05,
+   "roll": 1.2,
+   "lines": [
+    {
+     "t": "Assess risk",
+     "w": "light",
+     "at": 33.03
+    },
+    {
+     "t": "area by area",
+     "w": "heavy",
+     "at": 33.58,
+     "size": 150
+    }
+   ]
+  },
+  {
+   "start": 34.86,
+   "end": 38.76,
+   "y": 170,
+   "tilt": 0.05,
+   "roll": 1.0,
+   "lines": [
+    {
+     "t": "Comment",
+     "w": "light",
+     "at": 34.86
+    },
+    {
+     "t": "AREAS",
+     "w": "heavy",
+     "at": 35.18,
+     "size": 200
+    },
+    {
+     "t": "for our handover breakdown",
+     "w": "light",
+     "at": 35.72,
+     "size": 76
+    }
+   ]
+  },
+  {
+   "start": 39.04,
+   "end": 40.02,
+   "y": 210,
+   "tilt": -0.04,
+   "roll": -1.0,
+   "lines": [
+    {
+     "t": "Your call",
+     "w": "heavy",
+     "at": 39.04,
+     "size": 170
+    },
+    {
+     "t": "details in DM",
+     "w": "light",
+     "at": 39.36
+    }
+   ]
+  }
+ ],
+ "verdicts": [],
+ "subs": [],
+ "flashes": [
+  3.92,
+  34.86
+ ]
+}
