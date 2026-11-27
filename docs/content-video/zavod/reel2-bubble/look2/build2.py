@@ -18,9 +18,13 @@ parts = []
 run(['ffmpeg','-nostdin','-loglevel','error','-y','-i',f'lip_hook_{L}.mp4','-t',str(HOOK),'-an','-vf',VF + PAD] + ENC + [f'{L}0.mp4']); parts.append(f'{L}0.mp4')
 for i, (a, b) in enumerate(body):
     d = b - a
-    slow = max(d / 5.55, 1.0)                       # stretch the 6 s clip when the line is longer
-    vf = (f'setpts={slow:.4f}*PTS,' if slow > 1 else '') + VF + ',unsharp=5:5:0.6' + ''
-    run(['ffmpeg','-nostdin','-loglevel','error','-y','-ss','0.35','-i',f'b{i+2}.mp4','-t',f'{d:.3f}','-an','-vf',vf] + ENC + [f'{L}{i+1}.mp4']); parts.append(f'{L}{i+1}.mp4')
+    src, ss, avail = f'b{i+2}.mp4', '0.35', 5.55
+    if i == 5:                                      # fence scene: standing take, no steps; only its first seconds (camera pushes in later)
+        src, ss, avail = 'b7b.mp4', '0.10', 2.4
+    slow = max(d / avail, 1.0)                      # stretch the clip when the line is longer than the usable footage
+    smooth = 'minterpolate=fps=30:mi_mode=mci:mc_mode=aobmc,' if slow > 1.3 else ''
+    vf = (f'setpts={slow:.4f}*PTS,' if slow > 1 else '') + smooth + VF + ',unsharp=5:5:0.6'
+    run(['ffmpeg','-nostdin','-loglevel','error','-y','-ss',ss,'-i',src,'-t',f'{d:.3f}','-an','-vf',vf] + ENC + [f'{L}{i+1}.mp4']); parts.append(f'{L}{i+1}.mp4')
 run(['ffmpeg','-nostdin','-loglevel','error','-y','-i',f'lip_cta_{L}.mp4','-t',str(CTA),'-an','-vf',VF + PAD] + ENC + [f'{L}8.mp4']); parts.append(f'{L}8.mp4')
 open(f'list_{L}.txt','w').write(''.join(f"file '{p}'\n" for p in parts))
 run(['ffmpeg','-nostdin','-loglevel','error','-y','-f','concat','-safe','0','-i',f'list_{L}.txt','-c','copy',f'video_{L}.mp4'])
@@ -46,7 +50,7 @@ if L == 'ru':
      (8.52, 11.1, [('Ипотека лишь','light',8.52,None), ('в каждой десятой','heavy',9.42,124), ('сделке','light',10.5,None)]),
      (11.5, 15.9, [('С 2020 года в Дубае','light',11.5,84), ('+1,4 млн','heavy',13.9,200), ('жителей','light',15.34,None)]),
      (16.2, 21.85, [('Медиана за фут','light',16.2,None), ('1 730 AED','heavy',17.32,170), ('осенью −1–2% в месяц','light',19.4,76)]),
-     (22.2, 26.1, [('В 2027-м по плану сдают','light',22.2,76), ('122 000','heavy',24.18,200), ('юнитов','light',25.54,None)]),
+     (22.2, 26.1, [('В 2027-м по плану сдают','light',22.2,76), ('122 000','heavy',24.18,178), ('юнитов','light',25.54,None)]),
      (26.22, 30.2, [('Больше всего:','light',26.22,80), ('Dubai South','heavy',27.12,100), ('Wadi Al Safa','heavy',28.36,100), ('JVC','heavy',29.4,100)]),
      (30.38, 32.05, [('Считать надо','light',30.38,None), ('по районам','heavy',31.06,170)]),
     ]
@@ -61,7 +65,7 @@ else:
      (10.98, 13.8, [('Only about','light',10.98,None), ('one deal in ten','heavy',11.46,124), ('uses a mortgage','light',12.58,None)]),
      (14.28, 18.8, [('Since 2020, Dubai added','light',14.28,80), ('+1.4M','heavy',16.44,200), ('residents','light',18.02,None)]),
      (19.28, 26.8, [('Median price per sq ft','light',19.28,84), ('AED 1,730','heavy',20.4,170), ('this autumn: −1–2% a month','light',24.16,72)]),
-     (26.92, 32.6, [('Scheduled for handover in 2027','light',26.92,72), ('122,000','heavy',27.64,200), ('units','light',29.52,None)]),
+     (26.92, 32.6, [('Scheduled for handover in 2027','light',26.92,72), ('122,000','heavy',27.64,178), ('units','light',29.52,None)]),
      (33.02, 37.1, [('Most of it lands in','light',33.02,80), ('Dubai South','heavy',34.08,100), ('Wadi Al Safa','heavy',35.18,100), ('JVC','heavy',36.2,100)]),
      (37.26, 39.45, [('Assess risk','light',37.26,None), ('area by area','heavy',37.96,150)]),
     ]
