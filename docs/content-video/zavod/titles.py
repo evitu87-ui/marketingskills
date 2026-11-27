@@ -29,10 +29,11 @@ BASE, SPEC, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
 W, H = 1080, 1920
 FD = '/usr/share/fonts/opentype/inter/'
 FACE = {'heavy': FD + 'InterDisplay-BoldItalic.otf', 'light': FD + 'InterDisplay-Light.otf',
+        'mid': FD + 'InterDisplay-Medium.otf',      # secondary line for bright backgrounds, where Light gets lost
         'sub': FD + 'InterDisplay-LightItalic.otf'}
-SIZE = {'heavy': 176, 'light': 98, 'sub': 46}
+SIZE = {'heavy': 176, 'light': 98, 'mid': 90, 'sub': 46}
 GAP = 14                  # px between the cap boxes of neighbouring lines
-MAXW = 0.88 * W           # a line wider than this is scaled down
+MAXW = 0.80 * W           # a line wider than this is scaled down; phones crop the sides of a 9:16 video
 PER_LETTER, L_FADE, L_JIT = 0.028, 0.11, 0.035   # letter cadence, letter fade-in, order jitter (s)
 OUT_T = 0.22              # exit smear (s)
 PAD = 60
