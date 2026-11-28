@@ -8,7 +8,7 @@ by (1 - matte), so hosts always stay in front of the graphics.
 Usage:  python3 titles_air.py base.mp4 spec.json out.mp4            # video
         python3 titles_air.py base.mp4 spec.json out.png 3.2        # one frame at 3.2 s
 
-Spec: {"fps":30, "events":[{"start":0.1,"end":5.6,"x":84,"y":210,"tone":"auto|pearl|ink",
+Spec: {"fps":30, "events":[{"start":0.1,"end":5.6,"x":84,"y":"auto"|210,"tone":"auto|pearl|ink",
         "items":[{"type":"label","t":"РЫНОК В ЦИФРАХ","at":0.1},
                  {"type":"number","t":"−21 %","at":0.4},
                  {"type":"rule","at":0.9},
@@ -98,17 +98,47 @@ class Matte:
         m = np.clip((m - 0.35) / 0.4, 0, 1)                      # firm up the core
         m = cv2.dilate(m, np.ones((5, 5), np.uint8))              # text stops just before the hair edge
         m = cv2.GaussianBlur(m, (0, 0), 2.2)
-        if self.prev is not None:
+        if self.prev is not None and np.abs(m - self.prev).mean() < 0.06:   # not a cut
             m = 0.65 * m + 0.35 * self.prev                       # calm the edge between frames
         self.prev = m
         return m
+    def head_top(self, frames):
+        """Topmost row occupied by a person in any of the frames."""
+        top = H
+        for fr in frames:
+            self.prev = None
+            rows = np.where((self(fr) > 0.5).sum(axis=1) > 25)[0]
+            if len(rows):
+                top = min(top, int(rows[0]))
+        self.prev = None
+        return top
 
-def build(spec, probe):
-    """Pre-render sprites; probe(t) returns an RGB frame for automatic tone."""
+TOP_SAFE, TUCK, CLEAR = 200, 40, 34
+
+def block_height(ev, maxw):
+    h = 0
+    for it in ev['items']:
+        k = it['type']
+        if k == 'rule':
+            h += 2 + 2 * GAP['rule']; continue
+        _, _, hh = sprite(k, it['t'], it.get('size', SIZE[k]), PEARL, maxw)
+        h += hh + GAP[k]
+    return h
+
+def build(spec, probe, matte=None):
+    """Pre-render sprites; probe(t) returns an RGB frame (automatic tone and automatic height).
+
+    y = "auto" (default): the block is placed right above the heads. If the last item is a
+    large number it may tuck TUCK px behind the head; text never does."""
     evs = []
     for ev in spec['events']:
-        x0, y = ev.get('x', 84), ev.get('y', 210)
+        x0, y = ev.get('x', 84), ev.get('y', 'auto')
         maxw = int(ev.get('maxw', 0.80) * W)
+        if y == 'auto':
+            span = ev['end'] - ev['start']
+            top = matte.head_top([probe(ev['start'] + span * f) for f in (0.15, 0.5, 0.85)]) if matte else 760
+            last = [i for i in ev['items'] if i['type'] != 'rule'][-1]['type']
+            y = max(TOP_SAFE, top + (TUCK if last == 'number' else -CLEAR) - block_height(ev, maxw))
         tone = ev.get('tone', 'auto')
         if tone == 'auto':
             fr = probe((ev['start'] + ev['end']) / 2)
@@ -168,8 +198,8 @@ def main():
         raw = subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-ss', f'{t:.3f}', '-i', base, '-frames:v', '1',
                               '-vf', f'scale={W}:{H}', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], capture_output=True).stdout
         return np.frombuffer(raw, np.uint8).reshape(H, W, 3)
-    evs = build(spec, probe)
     matte = Matte()
+    evs = build(spec, probe, matte)
     if out.lower().endswith('.png'):
         t = float(sys.argv[4])
         Image.fromarray(compose(probe(t), layer(evs, t), matte)).save(out)
