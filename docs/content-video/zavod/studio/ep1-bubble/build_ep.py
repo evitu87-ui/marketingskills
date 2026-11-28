@@ -4,6 +4,8 @@ lang = sys.argv[1]
 S = '/tmp/claude-0/-home-user-marketingskills/367d5ad3-be96-5896-9cf1-da760ede2d29/scratchpad'
 R = '/home/user/marketingskills/docs/content-video/zavod'
 VF = 'scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,crop=1080:1920,fps=30,setsar=1,unsharp=5:5:0.5'
+# zoom 1.12 anchored top-right: hides a stray pale shape in the bottom-left corner of the Vitaly stills
+VFZ = 'scale=1210:2152:flags=lanczos,crop=1080:1920:130:0,fps=30,setsar=1,unsharp=5:5:0.5'
 titles = json.load(open(f'titles_{lang}.json', encoding='utf-8'))
 clips, t0, events = [], 0.0, []
 for c in titles:
@@ -14,7 +16,7 @@ for c in titles:
     d = round(b - a, 3)
     out = f'c_{name}.mp4'
     subprocess.run(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-ss', f'{a:.3f}', '-i', name + '.mp4', '-ss', f'{a:.3f}', '-i', f'v_{name}.mp3',
-                    '-t', f'{d:.3f}', '-map', '0:v', '-map', '1:a', '-vf', VF, '-af', f'aresample=48000,afade=t=in:d=0.03,afade=t=out:st={d-0.06:.3f}:d=0.06',
+                    '-t', f'{d:.3f}', '-map', '0:v', '-map', '1:a', '-vf', VFZ if c.get('zoom') else VF, '-af', f'aresample=48000,afade=t=in:d=0.03,afade=t=out:st={d-0.06:.3f}:d=0.06',
                     '-ac', '2', '-c:v', 'libx264', '-crf', '15', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', out], check=True)
     clips.append(out)
     def at(key):                       # time of a word (by prefix) on the episode timeline
